@@ -1,0 +1,9 @@
+MANIFEST
+Makefile.PL
+README
+lib/Gtk3/ImageView.pm
+t/1_basics.t
+t/90_MANIFEST.t
+t/91_critic.t
+t/perlcriticrc
+README
