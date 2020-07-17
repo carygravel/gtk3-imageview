@@ -11,7 +11,9 @@ authors, join gtk-perl-list@gnome.org at lists.gnome.org.
 INSTALLATION
 ------------
 
-To install this module type the following:
+Soon will be available from CPAN.
+
+To install this module from source type the following:
 
    perl Makefile.PL
    make
@@ -52,7 +54,9 @@ This module requires these other modules and libraries:
 
   perl >= 5.8.0
   Glib >= 1.163 (Perl module)
-  GTK+ > 3.x (C library)
+  GTK+ 3.x (C library)
+  Gtk3 (Perl module)
+  Readonly (Perl module)
 
 
 BUG REPORTS
