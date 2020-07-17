@@ -768,8 +768,6 @@ Gtk3::ImageView - Gtk3 port of the Gtk2::ImageView image viewer widget
 
 Gtk3 port of the Gtk2::ImageView image viewer widget
 
-Be sure to check out the example programs in the "examples" directory.
-
 To discuss Gtk3::ImageView or gtk3-perl, ask questions and flame/praise the
 authors, join gtk-perl-list@gnome.org at lists.gnome.org.
 
