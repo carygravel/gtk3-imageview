@@ -766,7 +766,7 @@ Gtk3::ImageView - Gtk3 port of the Gtk2::ImageView image viewer widget
 
 =head1 DESCRIPTION
 
-Gtk3 port of the Gtk2::ImageView image viewer widget
+Gtk3 port of the L<Gtk2::ImageView> image viewer widget
 
 To discuss Gtk3::ImageView or gtk3-perl, ask questions and flame/praise the
 authors, join gtk-perl-list@gnome.org at lists.gnome.org.
@@ -873,6 +873,22 @@ Returns the current resolution ratio.
 =head1 DEPENDENCIES
 
 =head1 INCOMPATIBILITIES
+
+=head2 Porting from L<Gtk2::ImageView>
+
+=over 1
+
+=item * C<set_from_pixbuf()> was renamed to C<set_pixbuf()>
+
+=item * C<set_fitting(TRUE)> was renamed to C<zoom_to_fit()>
+
+=item * C<set_tool()> (currently) takes name of the tool, not the blessed reference to it
+
+=item * C<drag_source_set()> needs accepts parameters in different order, and requires C<Gtk3::TargetEntry-E<gt>new>
+
+=item * C<Gtk2::ImageView::ScrollWin> replacement is not yet implemented
+
+=back
 
 =head1 BUGS AND LIMITATIONS
 
