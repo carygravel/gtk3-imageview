@@ -13,7 +13,11 @@ BEGIN {
 
 my $view = Gtk3::ImageView->new;
 isa_ok( $view, 'Gtk3::ImageView' );
-is( $view->get_tool, 'selector', 'get_tool() defaults to selector' );
+isa_ok(
+    $view->get_tool,
+    'Gtk3::ImageView::Tool::Dragger',
+    'get_tool() defaults to dragger'
+);
 
 system('convert rose: test.jpg');
 my $signal;
@@ -82,10 +86,14 @@ $signal = $view->signal_connect(
     'tool-changed' => sub {
         my ( $widget, $tool ) = @_;
         $view->signal_handler_disconnect($signal);
-        is $tool, 'dragger', 'emitted tool-changed signal';
+        isa_ok(
+            $tool,
+            'Gtk3::ImageView::Tool::Selector',
+            'emitted tool-changed signal'
+        );
     }
 );
-$view->set_tool('dragger');
+$view->set_tool('selector');
 
 $view->set_selection( { x => -10, y => -10, width => 20, height => 20 } );
 is_deeply(

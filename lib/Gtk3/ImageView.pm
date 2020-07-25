@@ -7,38 +7,23 @@ use feature 'switch';
 use Cairo;
 use Glib qw(TRUE FALSE);    # To get TRUE and FALSE
 use Gtk3;
+use Gtk3::ImageView::Tool;
+use Gtk3::ImageView::Tool::Dragger;
+use Gtk3::ImageView::Tool::Selector;
 use List::Util qw(min);
+use Scalar::Util qw(blessed);
 use Carp;
 use Readonly;
-Readonly my $HALF          => 0.5;
-Readonly my $CURSOR_PIXELS => 5;
-Readonly my $MAX_ZOOM      => 100;
+Readonly my $HALF     => 0.5;
+Readonly my $MAX_ZOOM => 100;
 
 our $VERSION = 1;
 
-my %cursorhash = (
-    left => {
-        top    => 'nw-resize',
-        mid    => 'w-resize',
-        bottom => 'sw-resize',
-    },
-    mid => {
-        top    => 'n-resize',
-        mid    => 'crosshair',
-        bottom => 's-resize',
-    },
-    right => {
-        top    => 'ne-resize',
-        mid    => 'e-resize',
-        bottom => 'se-resize',
-    },
-);
-
 # Note: in a BEGIN block to ensure that the registration is complete
 #       by the time the use Subclass goes to look for it.
-BEGIN {
-    Glib::Type->register_enum( 'Gtk3::ImageView::Tool', qw(dragger selector) );
-}
+#BEGIN {
+#    Glib::Type->register_enum( 'Gtk3::ImageView::Tool', qw(dragger selector) );
+#}
 
 use Glib::Object::Subclass Gtk3::DrawingArea::, signals => {
     'zoom-changed' => {
@@ -51,7 +36,7 @@ use Glib::Object::Subclass Gtk3::DrawingArea::, signals => {
         param_types => ['Glib::Scalar'],    # Gdk::Rectangle of selection area
     },
     'tool-changed' => {
-        param_types => ['Glib::String'],    # new tool
+        param_types => ['Glib::Scalar'],    # new Gtk3::ImageView::Tool
     },
   },
   properties => [
@@ -86,13 +71,11 @@ use Glib::Object::Subclass Gtk3::DrawingArea::, signals => {
         1.0,                                     # default_value
         [qw/readable writable/]                  # flags
     ),
-    Glib::ParamSpec->enum(
+    Glib::ParamSpec->scalar(
         'tool',                                  # name
         'tool',                                  # nickname
         'Active Gtk3::ImageView::Tool',          # blurb
-        'Gtk3::ImageView::Tool',
-        'dragger',                               # default
-        [qw/readable writable/]                  #flags
+        [qw/readable writable/]                  # flags
     ),
     Glib::ParamSpec->scalar(
         'selection',                                 # name
@@ -147,7 +130,7 @@ sub INIT_INSTANCE {
               )
         );
     }
-    $self->set_tool('selector');
+    $self->set_tool( Gtk3::ImageView::Tool::Dragger->new($self) );
     $self->set_redraw_on_allocate(FALSE);
     return $self;
 }
@@ -193,9 +176,7 @@ sub SET_PROPERTY {
                     or $oldval->{height} != $newval->{height} )
                 {
                     $self->{$name} = $newval;
-                    if ( $self->get_tool eq 'selector' ) {
-                        $invalidate = TRUE;
-                    }
+                    $invalidate = TRUE;
                     $self->signal_emit( 'selection-changed', $newval );
                 }
             }
@@ -245,114 +226,18 @@ sub get_pixbuf_size {
 
 sub _button_pressed {
     my ( $self, $event ) = @_;
-
-    # left mouse button
-    if ( $event->button == 1 ) {
-        $self->set_tool('selector');
-    }
-    elsif ( $event->button == 2 ) {    # middle mouse button
-        $self->set_tool('dragger');
-    }
-    else {
-        return FALSE;
-    }
-
-    $self->{drag_start} = { x => $event->x, y => $event->y };
-    $self->{dragging}   = TRUE;
-    $self->update_cursor( $event->x, $event->y );
-    if ( $self->get_tool eq 'selector' ) {
-        $self->_update_selection($event);
-    }
-    return TRUE;
+    $self->get_tool->button_pressed($event);
 }
 
 sub _button_released {
     my ( $self, $event ) = @_;
-    $self->{dragging} = FALSE;
-    $self->update_cursor( $event->x, $event->y );
-    if ( $self->get_tool eq 'selector' ) {
-        $self->_update_selection($event);
-    }
-    $self->set_tool('selector');
-    return;
+    $self->get_tool->button_released($event);
 }
 
 sub _motion {
     my ( $self, $event ) = @_;
     $self->update_cursor( $event->x, $event->y );
-    if ( not $self->{dragging} ) { return FALSE }
-
-    if ( $self->get_tool eq 'dragger' ) {
-        my $offset = $self->get_offset;
-        my $zoom   = $self->get_zoom;
-        my $ratio  = $self->get_resolution_ratio;
-        my $offset_x =
-          $offset->{x} +
-          ( $event->x - $self->{drag_start}{x} ) / $zoom * $ratio;
-        my $offset_y =
-          $offset->{y} + ( $event->y - $self->{drag_start}{y} ) / $zoom;
-        ( $self->{drag_start}{x}, $self->{drag_start}{y} ) =
-          ( $event->x, $event->y );
-        $self->set_offset( $offset_x, $offset_y );
-    }
-    elsif ( $self->get_tool eq 'selector' ) {
-        $self->_update_selection($event);
-    }
-    return;
-}
-
-sub _update_selection {
-    my ( $self, $event ) = @_;
-    my ( $x, $y, $x2, $y2, $x_old, $y_old, $x2_old, $y2_old );
-    if ( not defined $self->{h_edge} ) { $self->{h_edge} = 'mid' }
-    if ( not defined $self->{v_edge} ) { $self->{v_edge} = 'mid' }
-    if ( $self->{h_edge} eq 'left' ) {
-        $x = $event->x;
-    }
-    elsif ( $self->{h_edge} eq 'right' ) {
-        $x2 = $event->x;
-    }
-    if ( $self->{v_edge} eq 'top' ) {
-        $y = $event->y;
-    }
-    elsif ( $self->{v_edge} eq 'bottom' ) {
-        $y2 = $event->y;
-    }
-    if ( $self->{h_edge} eq 'mid' and $self->{v_edge} eq 'mid' ) {
-        $x  = $self->{drag_start}{x};
-        $y  = $self->{drag_start}{y};
-        $x2 = $event->x;
-        $y2 = $event->y;
-    }
-    else {
-        my $selection = $self->get_selection;
-        if ( not defined $x or not defined $y ) {
-            ( $x_old, $y_old ) =
-              $self->_to_widget_coords( $selection->{x}, $selection->{y} );
-        }
-        if ( not defined $x2 or not defined $y2 ) {
-            ( $x2_old, $y2_old ) = $self->_to_widget_coords(
-                $selection->{x} + $selection->{width},
-                $selection->{y} + $selection->{height}
-            );
-        }
-        if ( not defined $x ) {
-            $x = $x_old;
-        }
-        if ( not defined $x2 ) {
-            $x2 = $x2_old;
-        }
-        if ( not defined $y ) {
-            $y = $y_old;
-        }
-        if ( not defined $y2 ) {
-            $y2 = $y2_old;
-        }
-    }
-    my ( $w, $h ) = $self->_to_image_distance( abs $x2 - $x, abs $y2 - $y );
-    ( $x, $y ) = $self->_to_image_coords( min( $x, $x2 ), min( $y, $y2 ) );
-    $self->set_selection( { x => $x, y => $y, width => $w, height => $h } );
-    return;
+    $self->get_tool->motion($event);
 }
 
 sub _scroll {
@@ -617,6 +502,21 @@ sub get_viewport {
 
 sub set_tool {
     my ( $self, $tool ) = @_;
+    unless ( blessed $tool and $tool->isa('Gtk3::ImageView::Tool') ) {
+
+        # TODO remove this fallback, only accept Tool directly
+        given ($tool) {
+            when ('dragger') {
+                $tool = Gtk3::ImageView::Tool::Dragger->new($self);
+            }
+            when ('selector') {
+                $tool = Gtk3::ImageView::Tool::Selector->new($self);
+            }
+            default {
+                die "invalid set_tool call";
+            }
+        }
+    }
     $self->set( 'tool', $tool );
     return;
 }
@@ -671,70 +571,12 @@ sub update_cursor {
     my ( $self, $x, $y ) = @_;
     my $pixbuf_size = $self->get_pixbuf_size;
     if ( not defined $pixbuf_size ) { return }
-    my $win     = $self->get_window;
-    my $display = Gtk3::Gdk::Display::get_default;
-    my $tool    = $self->get_tool;
-    my $cursor;
+    my $win    = $self->get_window;
+    my $cursor = $self->get_tool->cursor_at_point( $x, $y );
+    return unless defined $cursor;
 
-    if ( $tool eq 'dragger' ) {
-        ( $x, $y ) = $self->_to_image_coords( $x, $y );
-        if (    $x > 0
-            and $x < $pixbuf_size->{width}
-            and $y > 0
-            and $y < $pixbuf_size->{height} )
-        {
-            if ( $self->{dragging} ) {
-                $cursor =
-                  Gtk3::Gdk::Cursor->new_from_name( $display, 'grabbing' );
-            }
-            else {
-                $cursor = Gtk3::Gdk::Cursor->new_from_name( $display, 'grab' );
-            }
-        }
-    }
-    elsif ( $tool eq 'selector' ) {
-
-        # If we are dragging, don't change the cursor, as we want to continue
-        # to drag the corner or edge or mid element we started dragging.
-        if ( $self->{dragging} ) { return }
-        ( $self->{h_edge}, $self->{v_edge} ) = qw( mid mid );
-        my $selection = $self->get_selection;
-        if ( defined $selection ) {
-            my ( $sx1, $sy1 ) =
-              $self->_to_widget_coords( $selection->{x}, $selection->{y} );
-            my ( $sx2, $sy2 ) = $self->_to_widget_coords(
-                $selection->{x} + $selection->{width},
-                $selection->{y} + $selection->{height}
-            );
-            if ( _between( $x, $sx1 - $CURSOR_PIXELS, $sx1 + $CURSOR_PIXELS ) )
-            {
-                $self->{h_edge} = 'left';
-            }
-            elsif (
-                _between( $x, $sx2 - $CURSOR_PIXELS, $sx2 + $CURSOR_PIXELS ) )
-            {
-                $self->{h_edge} = 'right';
-            }
-            if ( _between( $y, $sy1 - $CURSOR_PIXELS, $sy1 + $CURSOR_PIXELS ) )
-            {
-                $self->{v_edge} = 'top';
-            }
-            elsif (
-                _between( $y, $sy2 - $CURSOR_PIXELS, $sy2 + $CURSOR_PIXELS ) )
-            {
-                $self->{v_edge} = 'bottom';
-            }
-        }
-        $cursor = Gtk3::Gdk::Cursor->new_from_name( $display,
-            $cursorhash{ $self->{h_edge} }{ $self->{v_edge} } );
-    }
     $win->set_cursor($cursor);
     return;
-}
-
-sub _between {
-    my ( $value, $lower, $upper ) = @_;
-    return ( $value > $lower and $value < $upper );
 }
 
 1;
@@ -843,7 +685,9 @@ Returns a hash containing the position and size of the current viewport.
 
 =head2 $view->set_tool
 
-Set the current tool (i.e. mode) - either 'dragger' or 'selector'.
+Set the current tool (i.e. mode) - an object of a subclass of
+L<Gtk3::ImageView::Tool>, e.g. L<Gtk3::ImageView::Tool::Dragger> or
+L<Gtk3::ImageView::Tool::Selector>.
 
 =head2 $view->get_tool
 
@@ -881,8 +725,6 @@ Returns the current resolution ratio.
 =item * C<set_from_pixbuf()> was renamed to C<set_pixbuf()>
 
 =item * C<set_fitting(TRUE)> was renamed to C<zoom_to_fit()>
-
-=item * C<set_tool()> (currently) takes name of the tool, not the blessed reference to it
 
 =item * C<drag_source_set()> needs accepts parameters in different order, and requires C<Gtk3::TargetEntry-E<gt>new>
 

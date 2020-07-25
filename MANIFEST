@@ -2,6 +2,10 @@ MANIFEST
 Makefile.PL
 README.md
 lib/Gtk3/ImageView.pm
+lib/Gtk3/ImageView/Tool.pm
+lib/Gtk3/ImageView/Tool/Dragger.pm
+lib/Gtk3/ImageView/Tool/GimpAlike.pm
+lib/Gtk3/ImageView/Tool/Selector.pm
 t/1_basics.t
 t/90_MANIFEST.t
 t/91_critic.t
