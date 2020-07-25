@@ -6,19 +6,19 @@ my $author = "Jeffrey Ratcliffe";
 my $email  = 'jffry@posteo.net';
 
 # Slurp the program source and dig out the version number.
-my $text    = do { local ( @ARGV, $/ ) = $path; <> };
+my $text = do { local ( @ARGV, $/ ) = $path; <> };
 my $version = $1 if ( $text =~ /^my \$VERSION\s*=\s*'(.*)'/m );
 
 WriteMakefile(
     NAME      => 'Gtk3::ImageView',
     VERSION   => $version,
     PREREQ_PM => {
-        Glib => 1.210,
-        Gtk3 => 0,
+        Glib     => 1.210,
+        Gtk3     => 0,
         Readonly => 0,
     },
     TEST_REQUIRES => {
-        Test::More => 0,
+        Test::More        => 0,
         Test::Differences => 0,
     },
     clean => { FILES => '$(SOURCE_TIDY)' },
