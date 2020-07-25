@@ -15,6 +15,7 @@ WriteMakefile(
     PREREQ_PM => {
         Glib => 1.210,
         Gtk3 => 0,
+        Readonly => 0,
     },
     BUILD_REQUIRES => {
         Test::More => 0,
