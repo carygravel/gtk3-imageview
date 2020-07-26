@@ -19,12 +19,6 @@ Readonly my $MAX_ZOOM => 100;
 
 our $VERSION = 1;
 
-# Note: in a BEGIN block to ensure that the registration is complete
-#       by the time the use Subclass goes to look for it.
-#BEGIN {
-#    Glib::Type->register_enum( 'Gtk3::ImageView::Tool', qw(dragger selector) );
-#}
-
 use Glib::Object::Subclass Gtk3::DrawingArea::, signals => {
     'zoom-changed' => {
         param_types => ['Glib::Float'],    # new zoom
@@ -689,14 +683,25 @@ Returns a hash containing the position and size of the current viewport.
 =head2 $view->set_tool
 
 Set the current tool (i.e. mode) - an object of a subclass of
-L<Gtk3::ImageView::Tool|Gtk3::ImageView::Tool>, e.g.
-L<Gtk3::ImageView::Tool::Dragger|Gtk3::ImageView::Tool::Dragger> or
-L<Gtk3::ImageView::Tool::Selector|Gtk3::ImageView::Tool::Selector>, or
-L<Gtk3::ImageView::Tool::GimpAlike|Gtk3::ImageView::Tool::GimpAlike>.
+C<Gtk3::ImageView::Tool>.
+
+Here are some known subclasses of it:
+
+=over 1
+
+=item * C<Gtk3::ImageView::Tool::Dragger> lets drag the image around when zoomed.
+
+=item * C<Gtk3::ImageView::Tool::Selector> lets select a rectangular area with mouse.
+
+=item * C<Gtk3::ImageView::Tool::GimpAlike> selects or drags with different mouse buttons.
+
+=back
+
+Don't rely too much on how Tool currently interacts with ImageView.
 
 =head2 $view->get_tool
 
-Returns the current tool (i.e. mode) - either 'dragger' or 'selector'.
+Returns the current tool (i.e. mode).
 
 =head2 $view->set_selection($selection)
 
@@ -738,6 +743,8 @@ Returns the current resolution ratio.
 =back
 
 =head1 BUGS AND LIMITATIONS
+
+This should be rewritten on C, and Perl bindings should be provided via Glib Object Introspection.
 
 =head1 AUTHOR
 
