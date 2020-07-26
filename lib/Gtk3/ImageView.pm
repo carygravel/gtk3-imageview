@@ -693,7 +693,7 @@ Here are some known subclasses of it:
 
 =item * C<Gtk3::ImageView::Tool::Selector> lets select a rectangular area with mouse.
 
-=item * C<Gtk3::ImageView::Tool::GimpAlike> selects or drags with different mouse buttons.
+=item * C<Gtk3::ImageView::Tool::SelectorDragger> selects or drags with different mouse buttons.
 
 =back
 

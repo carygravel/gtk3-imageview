@@ -1,4 +1,4 @@
-package Gtk3::ImageView::Tool::GimpAlike;
+package Gtk3::ImageView::Tool::SelectorDragger;
 
 use warnings;
 use strict;
