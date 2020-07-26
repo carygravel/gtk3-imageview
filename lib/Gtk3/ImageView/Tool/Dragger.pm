@@ -5,6 +5,8 @@ use strict;
 use base 'Gtk3::ImageView::Tool';
 use Glib qw(TRUE FALSE);    # To get TRUE and FALSE
 
+our $VERSION = 1;
+
 sub button_pressed {
     my $self  = shift;
     my $event = shift;
@@ -12,7 +14,7 @@ sub button_pressed {
     # Convert the widget size to image scale to make the comparisons easier
     my $allocation = $self->view->get_allocation;
     ( $allocation->{width}, $allocation->{height} ) =
-      $self->view->_to_image_distance( $allocation->{width},
+      $self->view->to_image_distance( $allocation->{width},
         $allocation->{height} );
     my $pixbuf_size = $self->view->get_pixbuf_size;
     if (   $allocation->{width} > $pixbuf_size->{width}
@@ -33,6 +35,7 @@ sub button_released {
     my $event = shift;
     $self->{dragging} = FALSE;
     $self->view->update_cursor( $event->x, $event->y );
+    return;
 }
 
 sub motion {
@@ -49,11 +52,12 @@ sub motion {
     ( $self->{drag_start}{x}, $self->{drag_start}{y} ) =
       ( $event->x, $event->y );
     $self->view->set_offset( $offset_x, $offset_y );
+    return;
 }
 
 sub cursor_type_at_point {
     my ( $self, $x, $y ) = @_;
-    ( $x, $y ) = $self->view->_to_image_coords( $x, $y );
+    ( $x, $y ) = $self->view->to_image_coords( $x, $y );
     my $pixbuf_size = $self->view->get_pixbuf_size;
     if (    $x > 0
         and $x < $pixbuf_size->{width}
@@ -67,6 +71,7 @@ sub cursor_type_at_point {
             return 'grab';
         }
     }
+    return;
 }
 
 1;

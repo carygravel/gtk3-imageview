@@ -8,6 +8,8 @@ use List::Util qw(min);
 use Readonly;
 Readonly my $CURSOR_PIXELS => 5;
 
+our $VERSION = 1;
+
 my %cursorhash = (
     left => {
         top    => 'nw-resize',
@@ -42,6 +44,7 @@ sub button_released {
     $self->{dragging} = FALSE;
     $self->view->update_cursor( $event->x, $event->y );
     $self->_update_selection($event);
+    return;
 }
 
 sub motion {
@@ -49,6 +52,7 @@ sub motion {
     my $event = shift;
     if ( not $self->{dragging} ) { return FALSE }
     $self->_update_selection($event);
+    return;
 }
 
 sub _update_selection {
@@ -78,11 +82,10 @@ sub _update_selection {
         my $selection = $self->view->get_selection;
         if ( not defined $x or not defined $y ) {
             ( $x_old, $y_old ) =
-              $self->view->_to_widget_coords( $selection->{x},
-                $selection->{y} );
+              $self->view->to_widget_coords( $selection->{x}, $selection->{y} );
         }
         if ( not defined $x2 or not defined $y2 ) {
-            ( $x2_old, $y2_old ) = $self->view->_to_widget_coords(
+            ( $x2_old, $y2_old ) = $self->view->to_widget_coords(
                 $selection->{x} + $selection->{width},
                 $selection->{y} + $selection->{height}
             );
@@ -101,9 +104,9 @@ sub _update_selection {
         }
     }
     my ( $w, $h ) =
-      $self->view->_to_image_distance( abs $x2 - $x, abs $y2 - $y );
+      $self->view->to_image_distance( abs $x2 - $x, abs $y2 - $y );
     ( $x, $y ) =
-      $self->view->_to_image_coords( min( $x, $x2 ), min( $y, $y2 ) );
+      $self->view->to_image_coords( min( $x, $x2 ), min( $y, $y2 ) );
     $self->view->set_selection(
         { x => $x, y => $y, width => $w, height => $h } );
     return;
@@ -119,8 +122,8 @@ sub cursor_type_at_point {
     my $selection = $self->view->get_selection;
     if ( defined $selection ) {
         my ( $sx1, $sy1 ) =
-          $self->view->_to_widget_coords( $selection->{x}, $selection->{y} );
-        my ( $sx2, $sy2 ) = $self->view->_to_widget_coords(
+          $self->view->to_widget_coords( $selection->{x}, $selection->{y} );
+        my ( $sx2, $sy2 ) = $self->view->to_widget_coords(
             $selection->{x} + $selection->{width},
             $selection->{y} + $selection->{height}
         );
@@ -149,12 +152,13 @@ sub _between {
 
 sub get_selection {
     my $self = shift;
-    $self->view->get_selection;
+    return $self->view->get_selection;
 }
 
 sub set_selection {
-    my $self = shift;
-    $self->view->set_selection(@_);
+    my ( $self, @args ) = @_;
+    $self->view->set_selection(@args);
+    return;
 }
 
 1;

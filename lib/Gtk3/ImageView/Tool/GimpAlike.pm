@@ -5,6 +5,8 @@ use strict;
 use base 'Gtk3::ImageView::Tool';
 use Glib qw(TRUE FALSE);    # To get TRUE and FALSE
 
+our $VERSION = 1;
+
 sub new {
     my $class = shift;
     my $view  = shift;
@@ -27,7 +29,7 @@ sub button_pressed {
     else {
         return FALSE;
     }
-    $self->{_tool}->button_pressed($event);
+    return $self->{_tool}->button_pressed($event);
 }
 
 sub button_released {
@@ -35,17 +37,19 @@ sub button_released {
     my $event = shift;
     $self->{_tool}->button_released($event);
     $self->{_tool} = Gtk3::ImageView::Tool::Selector->new( $self->view );
+    return;
 }
 
 sub motion {
     my $self  = shift;
     my $event = shift;
     $self->{_tool}->motion($event);
+    return;
 }
 
 sub cursor_type_at_point {
     my ( $self, $x, $y ) = @_;
-    $self->{_tool}->cursor_type_at_point( $x, $y );
+    return $self->{_tool}->cursor_type_at_point( $x, $y );
 }
 
 1;

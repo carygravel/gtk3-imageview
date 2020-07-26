@@ -4,6 +4,8 @@ use warnings;
 use strict;
 use Glib qw(TRUE FALSE);    # To get TRUE and FALSE
 
+our $VERSION = 1;
+
 sub new {
     my $class = shift;
     my $view  = shift;
@@ -12,50 +14,52 @@ sub new {
 
 sub view {
     my $self = shift;
-    $self->{_view};
+    return $self->{_view};
 }
 
 sub button_pressed {
     my $self  = shift;
     my $event = shift;
-    FALSE;
+    return FALSE;
 }
 
 sub button_released {
     my $self  = shift;
     my $event = shift;
-    FALSE;
+    return FALSE;
 }
 
 sub motion {
     my $self  = shift;
     my $event = shift;
-    FALSE;
+    return FALSE;
 }
 
 sub cursor_at_point {
     my ( $self, $x, $y ) = @_;
     my $display     = Gtk3::Gdk::Display::get_default;
     my $cursor_type = $self->cursor_type_at_point( $x, $y );
-    return unless defined $cursor_type;
-    Gtk3::Gdk::Cursor->new_from_name( $display, $cursor_type );
+    if ( defined $cursor_type ) {
+        return Gtk3::Gdk::Cursor->new_from_name( $display, $cursor_type );
+    }
+    return;
 }
 
 sub cursor_type_at_point {
     my ( $self, $x, $y ) = @_;
-    undef;
+    return;
 }
 
 # compatibility layer
 
 sub signal_connect {
-    my $self = shift;
-    $self->view->signal_connect(@_);
+    my ( $self, @args ) = @_;
+    return $self->view->signal_connect(@args);
 }
 
 sub signal_handler_disconnect {
-    my $self = shift;
-    $self->view->signal_handler_disconnect(@_);
+    my ( $self, @args ) = @_;
+    return $self->view->signal_handler_disconnect(@args);
 }
 
 1;

@@ -226,24 +226,26 @@ sub get_pixbuf_size {
 
 sub _button_pressed {
     my ( $self, $event ) = @_;
-    $self->get_tool->button_pressed($event);
+    return $self->get_tool->button_pressed($event);
 }
 
 sub _button_released {
     my ( $self, $event ) = @_;
     $self->get_tool->button_released($event);
+    return;
 }
 
 sub _motion {
     my ( $self, $event ) = @_;
     $self->update_cursor( $event->x, $event->y );
     $self->get_tool->motion($event);
+    return;
 }
 
 sub _scroll {
     my ( $self, $event ) = @_;
     my ( $center_x, $center_y ) =
-      $self->_to_image_coords( $event->x, $event->y );
+      $self->to_image_coords( $event->x, $event->y );
     my $zoom;
     $self->set_zoom_to_fit(FALSE);
     if ( $event->direction eq 'up' ) {
@@ -330,7 +332,7 @@ sub get_zoom {
 }
 
 # convert x, y in image coords to widget coords
-sub _to_widget_coords {
+sub to_widget_coords {
     my ( $self, $x, $y ) = @_;
     my $zoom   = $self->get_zoom;
     my $ratio  = $self->get_resolution_ratio;
@@ -340,7 +342,7 @@ sub _to_widget_coords {
 }
 
 # convert x, y in widget coords to image coords
-sub _to_image_coords {
+sub to_image_coords {
     my ( $self, $x, $y ) = @_;
     my $zoom   = $self->get_zoom;
     my $ratio  = $self->get_resolution_ratio;
@@ -349,7 +351,7 @@ sub _to_image_coords {
 }
 
 # convert x, y in widget distance to image distance
-sub _to_image_distance {
+sub to_image_distance {
     my ( $self, $x, $y ) = @_;
     my $zoom  = $self->get_zoom;
     my $ratio = $self->get_resolution_ratio;
@@ -373,7 +375,7 @@ sub _set_zoom_no_center {
     my ( $self, $zoom ) = @_;
     my $allocation = $self->get_allocation;
     my ( $center_x, $center_y ) =
-      $self->_to_image_coords( $allocation->{width} / 2,
+      $self->to_image_coords( $allocation->{width} / 2,
         $allocation->{height} / 2 );
     $self->_set_zoom_with_center( $zoom, $center_x, $center_y );
     return;
@@ -463,7 +465,7 @@ sub set_offset {
     # Convert the widget size to image scale to make the comparisons easier
     my $allocation = $self->get_allocation;
     ( $allocation->{width}, $allocation->{height} ) =
-      $self->_to_image_distance( $allocation->{width}, $allocation->{height} );
+      $self->to_image_distance( $allocation->{width}, $allocation->{height} );
     my $pixbuf_size = $self->get_pixbuf_size;
 
     $offset_x = _clamp_direction( $offset_x, $allocation->{width},
@@ -487,8 +489,8 @@ sub get_viewport {
     my ( $x, $y, $w, $h );
     if ( defined $pixbuf ) {
         ( $x, $y, $w, $h ) = (
-            $self->_to_image_coords( 0, 0 ),
-            $self->_to_image_distance(
+            $self->to_image_coords( 0, 0 ),
+            $self->to_image_distance(
                 $allocation->{width}, $allocation->{height}
             )
         );
@@ -502,7 +504,7 @@ sub get_viewport {
 
 sub set_tool {
     my ( $self, $tool ) = @_;
-    unless ( blessed $tool and $tool->isa('Gtk3::ImageView::Tool') ) {
+    if ( not( blessed $tool and $tool->isa('Gtk3::ImageView::Tool') ) ) {
 
         # TODO remove this fallback, only accept Tool directly
         given ($tool) {
@@ -513,7 +515,7 @@ sub set_tool {
                 $tool = Gtk3::ImageView::Tool::Selector->new($self);
             }
             default {
-                die "invalid set_tool call";
+                croak 'invalid set_tool call';
             }
         }
     }
@@ -573,9 +575,10 @@ sub update_cursor {
     if ( not defined $pixbuf_size ) { return }
     my $win    = $self->get_window;
     my $cursor = $self->get_tool->cursor_at_point( $x, $y );
-    return unless defined $cursor;
+    if ( defined $cursor ) {
+        $win->set_cursor($cursor);
+    }
 
-    $win->set_cursor($cursor);
     return;
 }
 
@@ -608,7 +611,7 @@ Gtk3::ImageView - Gtk3 port of the Gtk2::ImageView image viewer widget
 
 =head1 DESCRIPTION
 
-Gtk3 port of the L<Gtk2::ImageView> image viewer widget
+Gtk3 port of the L<Gtk2::ImageView|Gtk2::ImageView> image viewer widget
 
 To discuss Gtk3::ImageView or gtk3-perl, ask questions and flame/praise the
 authors, join gtk-perl-list@gnome.org at lists.gnome.org.
@@ -686,8 +689,10 @@ Returns a hash containing the position and size of the current viewport.
 =head2 $view->set_tool
 
 Set the current tool (i.e. mode) - an object of a subclass of
-L<Gtk3::ImageView::Tool>, e.g. L<Gtk3::ImageView::Tool::Dragger> or
-L<Gtk3::ImageView::Tool::Selector>.
+L<Gtk3::ImageView::Tool|Gtk3::ImageView::Tool>, e.g.
+L<Gtk3::ImageView::Tool::Dragger|Gtk3::ImageView::Tool::Dragger> or
+L<Gtk3::ImageView::Tool::Selector|Gtk3::ImageView::Tool::Selector>, or
+L<Gtk3::ImageView::Tool::GimpAlike|Gtk3::ImageView::Tool::GimpAlike>.
 
 =head2 $view->get_tool
 
@@ -718,7 +723,7 @@ Returns the current resolution ratio.
 
 =head1 INCOMPATIBILITIES
 
-=head2 Porting from L<Gtk2::ImageView>
+=head2 Porting from L<Gtk2::ImageView|Gtk2::ImageView>
 
 =over 1
 
