@@ -73,6 +73,7 @@ Please submit bug reports to CPAN
 ## COPYRIGHT AND LICENSE
 
 Copyright (C) 2018--2020 by Jeffrey Ratcliffe
+Copyright (C) 2020 Google LLC, contributed by Alexey Sokolov
 
 Modelled after the GtkImageView C widget by Björn Lindqvist <bjourne@gmail.com>
 

@@ -1,12 +1,10 @@
 use ExtUtils::MakeMaker;
 
-my $path   = 'lib/Gtk3/ImageView.pm';
-my $year   = (localtime)[5] + 1900;
-my $author = "Jeffrey Ratcliffe";
-my $email  = 'jffry@posteo.net';
+my $path = 'lib/Gtk3/ImageView.pm';
+my $year = (localtime)[5] + 1900;
 
 # Slurp the program source and dig out the version number.
-my $text    = do { local ( @ARGV, $/ ) = $path; <> };
+my $text = do { local ( @ARGV, $/ ) = $path; <> };
 my $version = $1 if ( $text =~ /^my \$VERSION\s*=\s*'(.*)'/m );
 
 WriteMakefile(
@@ -26,8 +24,11 @@ WriteMakefile(
         $] >= 5.005
         ?    ## Add these new keywords supported since 5.005
           (
-            ABSTRACT_FROM => $path,              # retrieve abstract from module
-            AUTHOR        => "$author <$email>"
+            ABSTRACT_FROM => $path,    # retrieve abstract from module
+            AUTHOR        => [
+                'Jeffrey Ratcliffe <jffry@posteo.net>',
+                'Alexey Sokolov <sokolov@google.com>',
+            ]
           )
         : ()
     ),

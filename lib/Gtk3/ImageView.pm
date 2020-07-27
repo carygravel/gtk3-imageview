@@ -746,13 +746,17 @@ Returns the current resolution ratio.
 
 This should be rewritten on C, and Perl bindings should be provided via Glib Object Introspection.
 
-=head1 AUTHOR
+=head1 AUTHORS
 
 Jeffrey Ratcliffe, E<lt>jffry@posteo.netE<gt>
+
+Alexey Sokolov E<lt>sokolov@google.comE<gt>
 
 =head1 LICENSE AND COPYRIGHT
 
 Copyright (C) 2018--2020 by Jeffrey Ratcliffe
+
+Copyright (C) 2020 by Google LLC
 
 Modelled after the GtkImageView C widget by Björn Lindqvist <bjourne@gmail.com>
 
