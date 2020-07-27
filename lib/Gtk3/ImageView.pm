@@ -32,6 +32,13 @@ use Glib::Object::Subclass Gtk3::DrawingArea::, signals => {
     'tool-changed' => {
         param_types => ['Glib::Scalar'],    # new Gtk3::ImageView::Tool
     },
+    'dnd-start' => {
+        param_types => [
+            'Glib::Float',                  # x
+            'Glib::Float',                  # y
+            'Glib::UInt',                   # button
+        ],
+    }
   },
   properties => [
     Glib::ParamSpec->object(
@@ -736,7 +743,7 @@ Returns the current resolution ratio.
 
 =item * C<set_fitting(TRUE)> was renamed to C<zoom_to_fit()>
 
-=item * C<drag_source_set()> needs accepts parameters in different order, and requires C<Gtk3::TargetEntry-E<gt>new>
+=item * Drag'n'drop now can be triggered by subscribing to C<dnd-start> signal, and calling C<$view-E<gt>drag_begin_with_coordinates()> from the handler. C<drag_source_set()> won't work.
 
 =item * C<Gtk2::ImageView::ScrollWin> replacement is not yet implemented
 

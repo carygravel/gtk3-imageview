@@ -11,21 +11,11 @@ sub button_pressed {
     my $self  = shift;
     my $event = shift;
 
-    # Convert the widget size to image scale to make the comparisons easier
-    my $allocation = $self->view->get_allocation;
-    ( $allocation->{width}, $allocation->{height} ) =
-      $self->view->to_image_distance( $allocation->{width},
-        $allocation->{height} );
-    my $pixbuf_size = $self->view->get_pixbuf_size;
-    if (   $allocation->{width} > $pixbuf_size->{width}
-        && $allocation->{height} > $pixbuf_size->{height} )
-    {
-        # Nothing to drag around, let drag-n-drop work
-        return FALSE;
-    }
-
     $self->{drag_start} = { x => $event->x, y => $event->y };
-    $self->{dragging}   = TRUE;
+    $self->{dnd_start}  = { x => $event->x, y => $event->y };
+    $self->{dnd_eligible} = TRUE;
+    $self->{dragging}     = TRUE;
+    $self->{button}       = $event->button;
     $self->view->update_cursor( $event->x, $event->y );
     return TRUE;
 }
@@ -52,6 +42,32 @@ sub motion {
     ( $self->{drag_start}{x}, $self->{drag_start}{y} ) =
       ( $event->x, $event->y );
     $self->view->set_offset( $offset_x, $offset_y );
+    my $new_offset = $self->view->get_offset;
+
+    if ( not $self->{dnd_eligible} ) {
+        return;
+    }
+
+    if (   abs( $new_offset->{x} - $offset_x ) > 0.01
+        or abs( $new_offset->{y} - $offset_y ) > 0.01 )
+    {
+        if (
+            $self->view->drag_check_threshold(
+                $self->{dnd_start}{x}, $self->{dnd_start}{y},
+                $event->x,             $event->y
+            )
+          )
+        {
+            $self->{dragging} = FALSE;
+            $self->view->signal_emit( 'dnd-start', $event->x, $event->y,
+                $self->{button} );
+        }
+    }
+    else {
+        # If there was a movement in the image, disable start of dnd until
+        # mouse button is pressed again
+        $self->{dnd_eligible} = FALSE;
+    }
     return;
 }
 
