@@ -6,7 +6,7 @@ my $author = "Jeffrey Ratcliffe";
 my $email  = 'jffry@posteo.net';
 
 # Slurp the program source and dig out the version number.
-my $text = do { local ( @ARGV, $/ ) = $path; <> };
+my $text    = do { local ( @ARGV, $/ ) = $path; <> };
 my $version = $1 if ( $text =~ /^my \$VERSION\s*=\s*'(.*)'/m );
 
 WriteMakefile(
