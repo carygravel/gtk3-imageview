@@ -38,6 +38,8 @@ use Glib::Object::Subclass Gtk3::DrawingArea::, signals => {
             'Glib::Float',                  # y
             'Glib::UInt',                   # button
         ],
+        return_type => 'Glib::Boolean',
+        flags       => ['run-last'],
     }
   },
   properties => [

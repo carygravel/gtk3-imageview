@@ -4,6 +4,8 @@ use warnings;
 use strict;
 use base 'Gtk3::ImageView::Tool';
 use Glib qw(TRUE FALSE);    # To get TRUE and FALSE
+use Readonly;
+Readonly my $FLOAT_EPS => 0.01;
 
 our $VERSION = 1;
 
@@ -48,27 +50,34 @@ sub motion {
         return;
     }
 
-    if (   abs( $new_offset->{x} - $offset_x ) > 0.01
-        or abs( $new_offset->{y} - $offset_y ) > 0.01 )
+    if (    _approximately( $new_offset->{x}, $offset_x )
+        and _approximately( $new_offset->{y}, $offset_y ) )
     {
-        if (
-            $self->view->drag_check_threshold(
-                $self->{dnd_start}{x}, $self->{dnd_start}{y},
-                $event->x,             $event->y
-            )
-          )
-        {
-            $self->{dragging} = FALSE;
-            $self->view->signal_emit( 'dnd-start', $event->x, $event->y,
-                $self->{button} );
-        }
-    }
-    else {
         # If there was a movement in the image, disable start of dnd until
         # mouse button is pressed again
         $self->{dnd_eligible} = FALSE;
+        return;
+    }
+
+    # movement was clamped because of the edge, but did mouse move far enough?
+    if (
+        $self->view->drag_check_threshold(
+            $self->{dnd_start}{x}, $self->{dnd_start}{y},
+            $event->x,             $event->y
+        )
+        and $self->view->signal_emit(
+            'dnd-start', $event->x, $event->y, $self->{button}
+        )
+      )
+    {
+        $self->{dragging} = FALSE;
     }
     return;
+}
+
+sub _approximately {
+    my ( $a, $b ) = @_;
+    return abs( $a - $b ) < $FLOAT_EPS;
 }
 
 sub cursor_type_at_point {
