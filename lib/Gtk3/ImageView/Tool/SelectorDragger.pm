@@ -11,7 +11,9 @@ sub new {
     my $class = shift;
     my $view  = shift;
     my $self  = Gtk3::ImageView::Tool->new($view);
-    $self->{_tool} = Gtk3::ImageView::Tool::Selector->new($view);
+    $self->{_selector} = Gtk3::ImageView::Tool::Selector->new($view);
+    $self->{_dragger}  = Gtk3::ImageView::Tool::Dragger->new($view);
+    $self->{_tool}     = $self->{_selector};
     return bless $self, $class;
 }
 
@@ -21,10 +23,10 @@ sub button_pressed {
 
     # left mouse button
     if ( $event->button == 1 ) {
-        $self->{_tool} = Gtk3::ImageView::Tool::Selector->new( $self->view );
+        $self->{_tool} = $self->{_selector};
     }
     elsif ( $event->button == 2 ) {    # middle mouse button
-        $self->{_tool} = Gtk3::ImageView::Tool::Dragger->new( $self->view );
+        $self->{_tool} = $self->{_dragger};
     }
     else {
         return FALSE;
@@ -36,7 +38,7 @@ sub button_released {
     my $self  = shift;
     my $event = shift;
     $self->{_tool}->button_released($event);
-    $self->{_tool} = Gtk3::ImageView::Tool::Selector->new( $self->view );
+    $self->{_tool} = $self->{_selector};
     return;
 }
 
