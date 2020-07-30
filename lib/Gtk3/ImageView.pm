@@ -745,7 +745,7 @@ Returns the current resolution ratio.
 
 =item * C<set_fitting(TRUE)> was renamed to C<zoom_to_fit()>
 
-=item * Drag'n'drop now can be triggered by subscribing to C<dnd-start> signal, and calling C<$view-E<gt>drag_begin_with_coordinates()> from the handler. C<drag_source_set()> won't work.
+=item * Drag and drop now can be triggered by subscribing to C<dnd-start> signal, and calling C<$view-E<gt>drag_begin_with_coordinates()> from the handler. C<drag_source_set()> won't work.
 
 =item * C<Gtk2::ImageView::ScrollWin> replacement is not yet implemented
 
@@ -755,7 +755,7 @@ Returns the current resolution ratio.
 
 This should be rewritten on C, and Perl bindings should be provided via Glib Object Introspection.
 
-=head1 AUTHORS
+=head1 AUTHOR
 
 Jeffrey Ratcliffe, E<lt>jffry@posteo.netE<gt>
 
