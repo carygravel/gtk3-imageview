@@ -268,18 +268,28 @@ sub _draw {
     my $pixbuf     = $self->get_pixbuf;
     my $ratio      = $self->get_resolution_ratio;
     my $viewport   = $self->get_viewport;
+    $style->add_class('imageview');
+
+    $style->save;
+    $style->add_class(Gtk3::STYLE_CLASS_BACKGROUND);
+    Gtk3::render_background( $style, $context, $allocation->{x},
+        $allocation->{y}, $allocation->{width}, $allocation->{height} );
+    $style->restore;
+
     if ( defined $pixbuf ) {
+        $style->save;
+        $style->add_class('transparent');
+        my ( $x1, $y1 ) = $self->to_widget_coords( 0, 0 );
+        my ( $x2, $y2 ) =
+          $self->to_widget_coords( $pixbuf->get_width, $pixbuf->get_height );
+        Gtk3::render_background( $style, $context, $x1, $y1, $x2 - $x1,
+            $y2 - $y1 );
+        $style->restore;
+
         my $zoom = $self->get_zoom;
         $context->scale( $zoom / $ratio, $zoom );
         my $offset = $self->get_offset;
         $context->translate( $offset->{x}, $offset->{y} );
-    }
-    $style->save;
-    $style->add_class(Gtk3::STYLE_CLASS_BACKGROUND);
-    Gtk3::render_background( $style, $context, $viewport->{x}, $viewport->{y},
-        $viewport->{width}, $viewport->{height} );
-    $style->restore;
-    if ( defined $pixbuf ) {
         Gtk3::Gdk::cairo_set_source_pixbuf( $context, $pixbuf, 0, 0 );
     }
     else {
@@ -748,6 +758,12 @@ Returns the current resolution ratio.
 =item * Drag and drop now can be triggered by subscribing to C<dnd-start> signal, and calling C<$view-E<gt>drag_begin_with_coordinates()> from the handler. C<drag_source_set()> won't work.
 
 =item * C<Gtk2::ImageView::ScrollWin> replacement is not yet implemented
+
+=item * C<set_transp()> is now available through L<CSS|https://developer.gnome.org/gtk3/stable/chap-css-overview.html> instead, e.g. via
+
+ .imageview.transparent {
+     background-image: url('checkers.svg');
+ }
 
 =back
 
