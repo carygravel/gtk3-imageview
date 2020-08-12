@@ -20,6 +20,7 @@ WriteMakefile(
         Test::Differences => 0,
         Image::Magick     => 0,
         Try::Tiny         => 0,
+        Test::MockObject  => 0,
     },
     clean => { FILES => '$(SOURCE_TIDY)' },
     (
