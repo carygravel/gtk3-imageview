@@ -94,6 +94,15 @@ use Glib::Object::Subclass Gtk3::DrawingArea::, signals => {
         TRUE,                                        # default
         [qw/readable writable/]                      # flags
     ),
+    Glib::ParamSpec->float(
+        'zoom-to-fit-limit',                                         # name
+        'Zoom to fit limit',                                         # nickname
+        'When zooming automatically, don\'t zoom more than this',    # blurb
+        0.0001,                                                      # minimum
+        100.0,                                                       # maximum
+        100.0,                     # default_value
+        [qw/readable writable/]    # flags
+    ),
   ];
 
 sub INIT_INSTANCE {
@@ -404,8 +413,11 @@ sub _set_zoom_no_center {
 }
 
 sub set_zoom_to_fit {
-    my ( $self, $zoom_to_fit ) = @_;
+    my ( $self, $zoom_to_fit, $limit ) = @_;
     $self->set( 'zoom-to-fit', $zoom_to_fit );
+    if ( defined $limit ) {
+        $self->set( 'zoom-to-fit-limit', $limit );
+    }
     if ( not $zoom_to_fit ) { return }
     $self->zoom_to_box( $self->get_pixbuf_size );
     return;
@@ -417,10 +429,13 @@ sub zoom_to_box {
     if ( not defined $box->{x} )          { $box->{x}          = 0 }
     if ( not defined $box->{y} )          { $box->{y}          = 0 }
     if ( not defined $additional_factor ) { $additional_factor = 1 }
-    my $allocation  = $self->get_allocation;
-    my $ratio       = $self->get_resolution_ratio;
-    my $sc_factor_w = $allocation->{width} / $box->{width} * $ratio;
-    my $sc_factor_h = $allocation->{height} / $box->{height};
+    my $allocation = $self->get_allocation;
+    my $ratio      = $self->get_resolution_ratio;
+    my $limit      = $self->get('zoom-to-fit-limit');
+    my $sc_factor_w =
+      min( $limit, $allocation->{width} / $box->{width} ) * $ratio;
+    my $sc_factor_h =
+      min( $limit, $allocation->{height} / $box->{height} );
     $self->_set_zoom_with_center(
         min( $sc_factor_w, $sc_factor_h ) * $additional_factor,
         ( $box->{x} + $box->{width} / 2 ) / $ratio,
@@ -457,6 +472,12 @@ sub zoom_out {
 sub zoom_to_fit {
     my ($self) = @_;
     $self->set_zoom_to_fit(TRUE);
+    return;
+}
+
+sub set_fitting {
+    my ( $self, $value ) = @_;
+    $self->set_zoom_to_fit( $value, 1 );
     return;
 }
 
@@ -664,9 +685,9 @@ Specifies the zoom level.
 
 Returns the current zoom level.
 
-=head2 $view->set_zoom_to_fit($zoom_to_fit)
+=head2 $view->set_zoom_to_fit($zoom_to_fit, $limit)
 
-Specifies whether to zoom to fit or not.
+Specifies whether to zoom to fit or not. If limit is defined, such automatic zoom will not zoom more than it. If the limit is undefined, the previously set limit is used, initially it's unlimited.
 
 =head2 $view->zoom_to_box( $box, $additional_factor )
 
@@ -695,6 +716,14 @@ Halves the current zoom.
 Shortcut for
 
  $view->set_zoom_to_fit(TRUE);
+
+=head2 $view->set_fitting( $value )
+
+Shortcut for
+
+ $view->set_zoom_to_fit($value, 1);
+
+which means that it won't stretch a small image to a large window.
 
 =head2 $view->set_offset( $x, $y )
 
@@ -760,9 +789,9 @@ Returns the current resolution ratio.
 
 =over 1
 
-=item * C<set_from_pixbuf()> was renamed to C<set_pixbuf()>
+=item * C<set_from_pixbuf()> was renamed to C<set_pixbuf()> and now its second argument means C<zoom_to_fit()> instead of C<set_fitting()>.
 
-=item * C<set_fitting(TRUE)> was renamed to C<zoom_to_fit()>
+=item * C<set_fitting(TRUE)> used to be the default, now you need to call it explicitly if you want that behavior. However, once its called, new calls to C<set_from_pixbuf()> won't reset it, see C<set_zoom_to_fit()> for more details..
 
 =item * Drag and drop now can be triggered by subscribing to C<dnd-start> signal, and calling C<$view-E<gt>drag_begin_with_coordinates()> from the handler. C<drag_source_set()> won't work.
 
