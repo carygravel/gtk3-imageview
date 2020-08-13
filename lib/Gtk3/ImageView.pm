@@ -277,14 +277,17 @@ sub _draw {
     $style->restore;
 
     if ( defined $pixbuf ) {
-        $style->save;
-        $style->add_class('transparent');
-        my ( $x1, $y1 ) = $self->to_widget_coords( 0, 0 );
-        my ( $x2, $y2 ) =
-          $self->to_widget_coords( $pixbuf->get_width, $pixbuf->get_height );
-        Gtk3::render_background( $style, $context, $x1, $y1, $x2 - $x1,
-            $y2 - $y1 );
-        $style->restore;
+        if ( $pixbuf->get_has_alpha ) {
+            $style->save;
+            $style->add_class('transparent');
+            my ( $x1, $y1 ) = $self->to_widget_coords( 0, 0 );
+            my ( $x2, $y2 ) =
+              $self->to_widget_coords( $pixbuf->get_width,
+                $pixbuf->get_height );
+            Gtk3::render_background( $style, $context, $x1, $y1, $x2 - $x1,
+                $y2 - $y1 );
+            $style->restore;
+        }
 
         my $zoom = $self->get_zoom;
         $context->scale( $zoom / $ratio, $zoom );
