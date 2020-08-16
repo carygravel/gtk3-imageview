@@ -7,6 +7,8 @@ lib/Gtk3/ImageView/Tool/Dragger.pm
 lib/Gtk3/ImageView/Tool/Selector.pm
 lib/Gtk3/ImageView/Tool/SelectorDragger.pm
 t/1_basics.t
+t/2_transparent.t
 t/90_MANIFEST.t
 t/91_critic.t
 t/perlcriticrc
+t/transp-green.svg
