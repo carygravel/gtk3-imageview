@@ -18,6 +18,7 @@ WriteMakefile(
     TEST_REQUIRES => {
         Test::More        => 0,
         Test::Differences => 0,
+        Image::Magick     => 0,
     },
     clean => { FILES => '$(SOURCE_TIDY)' },
     (
