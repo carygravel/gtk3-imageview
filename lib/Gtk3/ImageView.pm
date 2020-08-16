@@ -279,6 +279,12 @@ sub _draw {
     if ( defined $pixbuf ) {
         if ( $pixbuf->get_has_alpha ) {
             $style->save;
+
+            # '.imageview' affects also area outside of the image. But only
+            # when background-image is specified. background-color seems to
+            # have no effect there. Probably a bug in Gtk? Either way, this is
+            # why need a special class 'transparent' to match the correct area
+            # inside the image where both image and color work.
             $style->add_class('transparent');
             my ( $x1, $y1 ) = $self->to_widget_coords( 0, 0 );
             my ( $x2, $y2 ) =
