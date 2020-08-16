@@ -1,6 +1,7 @@
 use warnings;
 use strict;
 use Try::Tiny;
+use File::Temp;
 use Test::More tests => 38;
 
 BEGIN {
@@ -19,7 +20,8 @@ isa_ok(
     'get_tool() defaults to dragger'
 );
 
-system('convert rose: test.jpg');
+my $tmp = File::Temp->new( SUFFIX => '.jpg' );
+system("convert rose: $tmp");
 my $signal;
 $signal = $view->signal_connect(
     'offset-changed' => sub {
@@ -29,7 +31,7 @@ $signal = $view->signal_connect(
         is $y, 11, 'emitted offset-changed signal y';
     }
 );
-$view->set_pixbuf( Gtk3::Gdk::Pixbuf->new_from_file('test.jpg'), TRUE );
+$view->set_pixbuf( Gtk3::Gdk::Pixbuf->new_from_file("$tmp"), TRUE );
 is_deeply(
     $view->get_viewport,
     {
@@ -214,5 +216,3 @@ SKIP: {
     ok( defined Glib::Type->list_values('Gtk3::ImageView::Transp'),
         'Check GtkImageTransp enum.' );
 }
-
-unlink 'test.jpg';
