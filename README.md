@@ -68,7 +68,7 @@ This module requires these other modules and libraries:
 
 ## BUG REPORTS
 
-Please submit bug reports to CPAN
+Please submit bug reports to https://github.com/carygravel/gtk3-imageview/issues
 
 ## COPYRIGHT AND LICENSE
 
