@@ -723,7 +723,8 @@ Shortcut for
 
  $view->set_zoom_to_fit($value, 1);
 
-which means that it won't stretch a small image to a large window.
+which means that it won't stretch a small image to a large window. Provided
+(despite the ambiguous name) for compatibility with Gtk2::ImageView.
 
 =head2 $view->set_offset( $x, $y )
 
@@ -746,9 +747,9 @@ Here are some known subclasses of it:
 
 =over 1
 
-=item * C<Gtk3::ImageView::Tool::Dragger> lets drag the image around when zoomed.
+=item * C<Gtk3::ImageView::Tool::Dragger> allows the image to be dragged when zoomed.
 
-=item * C<Gtk3::ImageView::Tool::Selector> lets select a rectangular area with mouse.
+=item * C<Gtk3::ImageView::Tool::Selector> allows the user to select a rectangular area of the image.
 
 =item * C<Gtk3::ImageView::Tool::SelectorDragger> selects or drags with different mouse buttons.
 
@@ -791,7 +792,7 @@ Returns the current resolution ratio.
 
 =item * C<set_from_pixbuf()> was renamed to C<set_pixbuf()> and now its second argument means C<zoom_to_fit()> instead of C<set_fitting()>.
 
-=item * C<set_fitting(TRUE)> used to be the default, now you need to call it explicitly if you want that behavior. However, once its called, new calls to C<set_from_pixbuf()> won't reset it, see C<set_zoom_to_fit()> for more details..
+=item * C<set_fitting(TRUE)> used to be the default, now you need to call it explicitly if you want that behavior. However, once it's called, new calls to C<set_from_pixbuf()> won't reset it, see C<set_zoom_to_fit()> for more details..
 
 =item * Drag and drop now can be triggered by subscribing to C<dnd-start> signal, and calling C<$view-E<gt>drag_begin_with_coordinates()> from the handler. C<drag_source_set()> won't work.
 
