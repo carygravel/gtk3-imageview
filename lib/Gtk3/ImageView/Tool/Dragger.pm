@@ -13,6 +13,11 @@ sub button_pressed {
     my $self  = shift;
     my $event = shift;
 
+    # Don't block context menu
+    if ( $event->button == 3 ) {
+        return FALSE;
+    }
+
     $self->{drag_start} = { x => $event->x, y => $event->y };
     $self->{dnd_start}  = { x => $event->x, y => $event->y };
     $self->{dnd_eligible} = TRUE;

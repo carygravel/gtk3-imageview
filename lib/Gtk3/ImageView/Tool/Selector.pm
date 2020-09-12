@@ -32,6 +32,12 @@ my %cursorhash = (
 sub button_pressed {
     my $self  = shift;
     my $event = shift;
+
+    # Don't block context menu
+    if ( $event->button == 3 ) {
+        return FALSE;
+    }
+
     $self->{drag_start} = { x => $event->x, y => $event->y };
     $self->{dragging}   = TRUE;
     $self->view->update_cursor( $event->x, $event->y );
