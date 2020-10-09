@@ -26,8 +26,9 @@ $window->hide;
 
 $view->set_zoom(8);
 my $event = Test::MockObject->new;
-$event->set_always( 'x', 7 );
-$event->set_always( 'y', 5 );
+$event->set_always( 'button', 0 );
+$event->set_always( 'x',      7 );
+$event->set_always( 'y',      5 );
 $view->get_tool->button_pressed($event);
 $event->set_always( 'x', 93 );
 $event->set_always( 'y', 67 );
