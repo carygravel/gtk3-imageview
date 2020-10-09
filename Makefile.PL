@@ -21,6 +21,7 @@ WriteMakefile(
         Image::Magick     => 0,
         Try::Tiny         => 0,
         Test::MockObject  => 0,
+        Carp::Always      => 0,
     },
     clean => { FILES => '$(SOURCE_TIDY)' },
     (
