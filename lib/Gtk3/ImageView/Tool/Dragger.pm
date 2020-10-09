@@ -5,7 +5,8 @@ use strict;
 use base 'Gtk3::ImageView::Tool';
 use Glib qw(TRUE FALSE);    # To get TRUE and FALSE
 use Readonly;
-Readonly my $FLOAT_EPS => 0.01;
+Readonly my $FLOAT_EPS    => 0.01;
+Readonly my $RIGHT_BUTTON => 3;
 
 our $VERSION = 1;
 
@@ -14,7 +15,7 @@ sub button_pressed {
     my $event = shift;
 
     # Don't block context menu
-    if ( $event->button == 3 ) {
+    if ( $event->button == $RIGHT_BUTTON ) {
         return FALSE;
     }
 
