@@ -8,6 +8,7 @@ use Glib qw(TRUE FALSE);    # To get TRUE and FALSE
 use List::Util qw(min);
 use Readonly;
 Readonly my $CURSOR_PIXELS => 5;
+Readonly my $RIGHT_BUTTON  => 3;
 
 our $VERSION = 1;
 
@@ -34,7 +35,7 @@ sub button_pressed {
     my $event = shift;
 
     # Don't block context menu
-    if ( $event->button == 3 ) {
+    if ( $event->button == $RIGHT_BUTTON ) {
         return FALSE;
     }
 
