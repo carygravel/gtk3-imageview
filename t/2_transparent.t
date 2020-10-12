@@ -34,7 +34,12 @@ my $tmp = File::Temp->new( SUFFIX => '.png' );
 Glib::Timeout->add(
     1000,
     sub {
-        system("import -window 2_transparent.t $tmp");
+        if ( system("import -window 2_transparent.t $tmp") ) {
+
+# Looking up by window name doesn't work in Xvfb.
+# Take screenshot of the whole screen and rely on this window to be in top left corner.
+            system("import -window root -crop 300x200+0+0 $tmp");
+        }
         Gtk3::main_quit;
         return FALSE;
     }
