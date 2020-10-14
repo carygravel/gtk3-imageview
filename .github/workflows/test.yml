@@ -1,0 +1,26 @@
+name: Test
+on:
+  - push
+  - pull_request
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        # Some deps can't be installed purely from CPAN. And some other are just slow to install from there.
+      - run: sudo apt install libimage-magick-perl libgtk3-perl libglib-object-introspection-perl libtest-differences-perl libcarp-always-perl cpanminus xvfb
+        # Install everything which is still not installed, but don't mess current directory with root-owned files
+      - run: cp -R . /tmp/copy-for-deps
+      - run: sudo cpanm --installdeps /tmp/copy-for-deps
+      - run: perl Makefile.PL
+      - run: xvfb-run --auto-servernum make test
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: github/super-linter@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          FILTER_REGEX_EXCLUDE: Makefile.PL

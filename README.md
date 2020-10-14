@@ -60,15 +60,15 @@ make html
 
 This module requires these other modules and libraries:
 
-    perl >= 5.8.0
-    Glib >= 1.163 (Perl module)
-    GTK+ 3.x (C library)
-    Gtk3 (Perl module)
-    Readonly (Perl module)
+* perl >= 5.8.0
+* Glib >= 1.163 (Perl module)
+* GTK+ 3.x (C library)
+* Gtk3 (Perl module)
+* Readonly (Perl module)
 
 ## BUG REPORTS
 
-Please submit bug reports to https://github.com/carygravel/gtk3-imageview/issues
+Please submit bug reports [here](https://github.com/carygravel/gtk3-imageview/issues)
 
 ## COPYRIGHT AND LICENSE
 
