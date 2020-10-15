@@ -796,13 +796,15 @@ Returns the current resolution ratio.
 
 =item * Drag and drop now can be triggered by subscribing to C<dnd-start> signal, and calling C<$view-E<gt>drag_begin_with_coordinates()> from the handler. C<drag_source_set()> won't work.
 
-=item * C<Gtk2::ImageView::ScrollWin> replacement is not yet implemented
+=item * C<Gtk2::ImageView::ScrollWin> replacement is not yet implemented.
 
 =item * C<set_transp()> is now available through L<CSS|https://developer.gnome.org/gtk3/stable/chap-css-overview.html> instead, e.g. via
 
  .imageview.transparent {
      background-image: url('checkers.svg');
  }
+
+=item * C<set_interpolation()> is not yet implemented.
 
 =back
 
