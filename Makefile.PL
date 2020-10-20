@@ -5,7 +5,7 @@ my $year = (localtime)[5] + 1900;
 
 # Slurp the program source and dig out the version number.
 my $text = do { local ( @ARGV, $/ ) = $path; <> };
-my $version = $1 if ( $text =~ /^my \$VERSION\s*=\s*'(.*)'/m );
+my $version = $2 if ( $text =~ /^(my|our) \$VERSION\s*=\s*'?(.*)'?/m );
 
 WriteMakefile(
     NAME      => 'Gtk3::ImageView',
@@ -41,7 +41,7 @@ WriteMakefile(
 sub MY::postamble {
     my $postamble = <<'END';
 SHELL = bash
-NAME = gtk3-imageview
+NAME = Gtk3-ImageView
 MANIFEST = $(shell cat MANIFEST)
 SOURCE = $(filter %.pm %.PL %.pl %.t,$(MANIFEST))
 SOURCE_TIDY = $(foreach file,$(SOURCE),$(file).tdy)
