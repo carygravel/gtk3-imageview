@@ -34,9 +34,12 @@ my $tmp = File::Temp->new( SUFFIX => '.png' );
 Glib::Timeout->add(
     1000,
     sub {
-        my $rwin    = Gtk3::Gdk::get_default_root_window;
-        my $h       = $rwin->get_height;
-        my $w       = $rwin->get_width;
+        my $rwin = Gtk3::Gdk::get_default_root_window;
+        my $h    = $rwin->get_height;
+        my $w    = $rwin->get_width;
+
+        # If we have a real display, the window is centred.
+        # If we are using xvfb-run, it appears in the top-left hand corner
         my $display = Gtk3::Gdk::Display::get_default;
         if ( $display->get_name eq ':99' ) {
             $w = 300;
