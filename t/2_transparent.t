@@ -34,9 +34,14 @@ my $tmp = File::Temp->new( SUFFIX => '.png' );
 Glib::Timeout->add(
     1000,
     sub {
-        my $rwin   = Gtk3::Gdk::get_default_root_window;
-        my $h      = $rwin->get_height;
-        my $w      = $rwin->get_width;
+        my $rwin    = Gtk3::Gdk::get_default_root_window;
+        my $h       = $rwin->get_height;
+        my $w       = $rwin->get_width;
+        my $display = Gtk3::Gdk::Display::get_default;
+        if ( $display->get_name eq ':99' ) {
+            $w = 300;
+            $h = 200;
+        }
         my $pixbuf = Gtk3::Gdk::pixbuf_get_from_window( $rwin, 0, 0, $w, $h );
         $pixbuf->save( $tmp, 'png' );
         Gtk3::main_quit;
