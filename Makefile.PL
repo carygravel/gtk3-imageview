@@ -23,6 +23,16 @@ WriteMakefile(
         Test::MockObject  => 0,
         Carp::Always      => 0,
     },
+    META_MERGE => {
+        'meta-spec' => { version => 2 },
+         resources => {
+             repository => {
+                 type => 'git',
+                 url  => 'https://github.com/carygravel/gtk3-imageview.git',
+                 web  => 'https://github.com/carygravel/gtk3-imageview',
+             },
+         },
+    },
     clean => { FILES => '$(SOURCE_TIDY)' },
     (
         $] >= 5.005
