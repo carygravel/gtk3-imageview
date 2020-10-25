@@ -3,6 +3,7 @@ use strict;
 use File::Temp;
 use Image::Magick;
 use Test::More tests => 4;
+use MIME::Base64;
 
 BEGIN {
     use Glib qw/TRUE FALSE/;
@@ -47,6 +48,9 @@ Glib::Timeout->add(
     }
 );
 Gtk3::main;
+
+diag('PNG of the shown window:');
+diag( encode_base64( $image->ImageToBlob ) );
 
 my $x      = $image->Get('width') / 2;
 my $y      = $image->Get('height') / 2;
