@@ -8,6 +8,11 @@ BEGIN {
     use Glib qw/TRUE FALSE/;
     use Gtk3 -init;
     use_ok('Gtk3::ImageView');
+    Glib::Object::Introspection->setup(
+        basename => 'GdkX11',
+        version  => '3.0',
+        package  => 'Gtk3::GdkX11',
+    );
 }
 
 my $window = Gtk3::Window->new('toplevel');
@@ -29,32 +34,20 @@ $view->set_pixbuf( Gtk3::Gdk::Pixbuf->new_from_file('t/transp-green.svg'),
     TRUE );
 $window->add($view);
 $window->show_all;
+my $xid = $window->get_window->get_xid;
 
-my $tmp = File::Temp->new( SUFFIX => '.png' );
+my $image = Image::Magick->new( magick => 'png' );
+
 Glib::Timeout->add(
     1000,
     sub {
-        my $rwin = Gtk3::Gdk::get_default_root_window;
-        my $h    = $rwin->get_height;
-        my $w    = $rwin->get_width;
-
-        # If we have a real display, the window is centred.
-        # If we are using xvfb-run, it appears in the top-left hand corner
-        my $display = Gtk3::Gdk::Display::get_default;
-        if ( $display->get_name eq ':99' ) {
-            $w = 300;
-            $h = 200;
-        }
-        my $pixbuf = Gtk3::Gdk::pixbuf_get_from_window( $rwin, 0, 0, $w, $h );
-        $pixbuf->save( $tmp, 'png' );
+        $image->Read("x:$xid");
         Gtk3::main_quit;
         return FALSE;
     }
 );
 Gtk3::main;
 
-my $image = Image::Magick->new;
-$image->Read($tmp);
 my $x      = $image->Get('width') / 2;
 my $y      = $image->Get('height') / 2;
 my @middle = $image->GetPixel( x => $x, y => $y );
