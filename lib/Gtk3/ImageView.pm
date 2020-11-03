@@ -187,6 +187,10 @@ sub SET_PROPERTY {
                 $self->{$name} = $newval;
                 $invalidate = TRUE;
             }
+            when ('interpolation') {
+                $self->{$name} = $newval;
+                $invalidate = TRUE;
+            }
             when ('selection') {
                 if (   ( defined $newval xor defined $oldval )
                     or $oldval->{x} != $newval->{x}
