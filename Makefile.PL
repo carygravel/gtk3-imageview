@@ -25,13 +25,13 @@ WriteMakefile(
     },
     META_MERGE => {
         'meta-spec' => { version => 2 },
-         resources => {
-             repository => {
-                 type => 'git',
-                 url  => 'https://github.com/carygravel/gtk3-imageview.git',
-                 web  => 'https://github.com/carygravel/gtk3-imageview',
-             },
-         },
+        resources   => {
+            repository => {
+                type => 'git',
+                url  => 'https://github.com/carygravel/gtk3-imageview.git',
+                web  => 'https://github.com/carygravel/gtk3-imageview',
+            },
+        },
     },
     clean => { FILES => '$(SOURCE_TIDY)' },
     (
