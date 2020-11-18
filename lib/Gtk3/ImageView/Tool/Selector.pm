@@ -13,20 +13,20 @@ Readonly my $RIGHT_BUTTON  => 3;
 our $VERSION = 4;
 
 my %cursorhash = (
-    left => {
-        top    => 'nw-resize',
-        mid    => 'w-resize',
-        bottom => 'sw-resize',
+    lower => {
+        lower => 'nw-resize',
+        mid   => 'w-resize',
+        upper => 'sw-resize',
     },
     mid => {
-        top    => 'n-resize',
-        mid    => 'crosshair',
-        bottom => 's-resize',
+        lower => 'n-resize',
+        mid   => 'crosshair',
+        upper => 's-resize',
     },
-    right => {
-        top    => 'ne-resize',
-        mid    => 'e-resize',
-        bottom => 'se-resize',
+    upper => {
+        lower => 'ne-resize',
+        mid   => 'e-resize',
+        upper => 'se-resize',
     },
 );
 
@@ -39,7 +39,7 @@ sub button_pressed {
         return FALSE;
     }
 
-    $self->{drag_start} = { x => $event->x, y => $event->y };
+    $self->{drag_start} = { x => undef, y => undef };
     $self->{dragging}   = TRUE;
     $self->view->update_cursor( $event->x, $event->y );
     $self->_update_selection($event);
@@ -68,16 +68,20 @@ sub _update_selection {
     my ( $x, $y, $x2, $y2, $x_old, $y_old, $x2_old, $y2_old );
     if ( not defined $self->{h_edge} ) { $self->{h_edge} = 'mid' }
     if ( not defined $self->{v_edge} ) { $self->{v_edge} = 'mid' }
-    if ( $self->{h_edge} eq 'left' ) {
-        $x = $event->x;
+    if ( $self->{h_edge} eq 'lower' ) {
+        $x  = $event->x;
+        $x2 = $self->{drag_start}{x};
     }
-    elsif ( $self->{h_edge} eq 'right' ) {
+    elsif ( $self->{h_edge} eq 'upper' ) {
+        $x  = $self->{drag_start}{x};
         $x2 = $event->x;
     }
-    if ( $self->{v_edge} eq 'top' ) {
-        $y = $event->y;
+    if ( $self->{v_edge} eq 'lower' ) {
+        $y  = $event->y;
+        $y2 = $self->{drag_start}{y};
     }
-    elsif ( $self->{v_edge} eq 'bottom' ) {
+    elsif ( $self->{v_edge} eq 'upper' ) {
+        $y  = $self->{drag_start}{y};
         $y2 = $event->y;
     }
     if ( $self->{h_edge} eq 'mid' and $self->{v_edge} eq 'mid' ) {
@@ -129,10 +133,6 @@ sub _update_selection {
 sub cursor_type_at_point {
     my ( $self, $x, $y ) = @_;
 
-    # If we are dragging, don't change the cursor, as we want to continue
-    # to drag the corner or edge or mid element we started dragging.
-    if ( $self->{dragging} ) { return }
-    ( $self->{h_edge}, $self->{v_edge} ) = qw( mid mid );
     my $selection = $self->view->get_selection;
     if ( defined $selection ) {
         my ( $sx1, $sy1 ) =
@@ -141,20 +141,100 @@ sub cursor_type_at_point {
             $selection->{x} + $selection->{width},
             $selection->{y} + $selection->{height}
         );
-        if ( _between( $x, $sx1 - $CURSOR_PIXELS, $sx1 + $CURSOR_PIXELS ) ) {
-            $self->{h_edge} = 'left';
+
+        # If we are dragging, a corner cursor must stay as a corner cursor,
+        # a left/right cursor must stay as left/right,
+        # and a top/bottom cursor must stay as top/bottom
+        if ( $self->{dragging} ) {
+            $self->_update_dragged_edge( 'x', $x, $sx1, $sx2 );
+            $self->_update_dragged_edge( 'y', $y, $sy1, $sy2 );
+            if ( $self->{h_edge} eq 'mid' ) {
+                if ( $self->{v_edge} eq 'mid' ) {
+                    $self->{h_edge}     = 'upper';
+                    $self->{v_edge}     = 'upper';
+                    $self->{drag_start} = { x => $x, y => $y };
+                }
+                else {
+                    if ( not defined $self->{drag_start}{x} ) {
+                        $self->{drag_start}{x} =
+                          $self->{v_edge} eq 'lower' ? $sx2 : $sx1;
+                    }
+                }
+            }
+            elsif ( $self->{v_edge} eq 'mid' ) {
+                if ( not defined $self->{drag_start}{y} ) {
+                    $self->{drag_start}{y} =
+                      $self->{h_edge} eq 'lower' ? $sy2 : $sy1;
+                }
+            }
         }
-        elsif ( _between( $x, $sx2 - $CURSOR_PIXELS, $sx2 + $CURSOR_PIXELS ) ) {
-            $self->{h_edge} = 'right';
+        else {
+            ( $self->{h_edge}, $self->{v_edge} ) = qw( mid mid );
+
+            if ( _between( $x, $sx1 - $CURSOR_PIXELS, $sx1 + $CURSOR_PIXELS ) )
+            {
+                $self->{h_edge} = 'lower';
+            }
+            elsif (
+                _between( $x, $sx2 - $CURSOR_PIXELS, $sx2 + $CURSOR_PIXELS ) )
+            {
+                $self->{h_edge} = 'upper';
+            }
+            if ( _between( $y, $sy1 - $CURSOR_PIXELS, $sy1 + $CURSOR_PIXELS ) )
+            {
+                $self->{v_edge} = 'lower';
+            }
+            elsif (
+                _between( $y, $sy2 - $CURSOR_PIXELS, $sy2 + $CURSOR_PIXELS ) )
+            {
+                $self->{v_edge} = 'upper';
+            }
         }
-        if ( _between( $y, $sy1 - $CURSOR_PIXELS, $sy1 + $CURSOR_PIXELS ) ) {
-            $self->{v_edge} = 'top';
+    }
+    else {
+        if ( $self->{dragging} ) {
+            $self->{drag_start} = { x => $x, y => $y };
+            ( $self->{h_edge}, $self->{v_edge} ) = qw( upper upper );
         }
-        elsif ( _between( $y, $sy2 - $CURSOR_PIXELS, $sy2 + $CURSOR_PIXELS ) ) {
-            $self->{v_edge} = 'bottom';
+        else {
+            ( $self->{h_edge}, $self->{v_edge} ) = qw( mid mid );
         }
     }
     return $cursorhash{ $self->{h_edge} }{ $self->{v_edge} };
+}
+
+sub _update_dragged_edge {
+    my ( $self, $direction, $s, $s1, $s2 ) = @_;
+    my $edge = ( $direction eq 'x' ? 'h' : 'v' ) . '_edge';
+    if ( $self->{$edge} eq 'lower' ) {
+        if ( defined $self->{drag_start}{$direction} ) {
+            if ( $s > $self->{drag_start}{$direction} ) {
+                $self->{$edge} = 'upper';
+            }
+            else {
+                $self->{$edge} = 'lower';
+            }
+        }
+        else {
+            $self->{drag_start}{$direction} = $s2;
+            $self->{$edge} = 'lower';
+        }
+    }
+    elsif ( $self->{$edge} eq 'upper' ) {
+        if ( defined $self->{drag_start}{$direction} ) {
+            if ( $s < $self->{drag_start}{$direction} ) {
+                $self->{$edge} = 'lower';
+            }
+            else {
+                $self->{$edge} = 'upper';
+            }
+        }
+        else {
+            $self->{drag_start}{$direction} = $s1;
+            $self->{$edge} = 'upper';
+        }
+    }
+    return;
 }
 
 sub _between {
