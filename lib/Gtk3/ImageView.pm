@@ -17,7 +17,7 @@ use Readonly;
 Readonly my $HALF     => 0.5;
 Readonly my $MAX_ZOOM => 100;
 
-our $VERSION = 5;
+our $VERSION = 6;
 
 use Glib::Object::Subclass Gtk3::DrawingArea::, signals => {
     'zoom-changed' => {
@@ -660,7 +660,7 @@ Gtk3::ImageView - Image viewer widget for Gtk3
 
 =head1 VERSION
 
-4
+6
 
 =head1 SYNOPSIS
 
