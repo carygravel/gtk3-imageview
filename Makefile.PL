@@ -4,7 +4,7 @@ my $path = 'lib/Gtk3/ImageView.pm';
 my $year = (localtime)[5] + 1900;
 
 # Slurp the program source and dig out the version number.
-my $text = do { local ( @ARGV, $/ ) = $path; <> };
+my $text    = do { local ( @ARGV, $/ ) = $path; <> };
 my $version = $2 if ( $text =~ /^(my|our) \$VERSION\s*=\s*'?([^;]*)'?/m );
 
 WriteMakefile(
