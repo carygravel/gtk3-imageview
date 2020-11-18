@@ -169,26 +169,10 @@ sub cursor_type_at_point {
             }
         }
         else {
-            ( $self->{h_edge}, $self->{v_edge} ) = qw( mid mid );
-
-            if ( _between( $x, $sx1 - $CURSOR_PIXELS, $sx1 + $CURSOR_PIXELS ) )
-            {
-                $self->{h_edge} = 'lower';
-            }
-            elsif (
-                _between( $x, $sx2 - $CURSOR_PIXELS, $sx2 + $CURSOR_PIXELS ) )
-            {
-                $self->{h_edge} = 'upper';
-            }
-            if ( _between( $y, $sy1 - $CURSOR_PIXELS, $sy1 + $CURSOR_PIXELS ) )
-            {
-                $self->{v_edge} = 'lower';
-            }
-            elsif (
-                _between( $y, $sy2 - $CURSOR_PIXELS, $sy2 + $CURSOR_PIXELS ) )
-            {
-                $self->{v_edge} = 'upper';
-            }
+            $self->_update_undragged_edge( 'h_edge', $x, $y, $sx1, $sy1, $sx2,
+                $sy2 );
+            $self->_update_undragged_edge( 'v_edge', $y, $x, $sy1, $sx1, $sy2,
+                $sx2 );
         }
     }
     else {
@@ -231,6 +215,21 @@ sub _update_dragged_edge {
         }
         else {
             $self->{drag_start}{$direction} = $s1;
+            $self->{$edge} = 'upper';
+        }
+    }
+    return;
+}
+
+sub _update_undragged_edge {
+    my ( $self, $edge, @coords ) = @_;
+    my ( $x, $y, $sx1, $sy1, $sx2, $sy2 ) = @coords;
+    $self->{$edge} = 'mid';
+    if ( _between( $y, $sy1, $sy2 ) ) {
+        if ( _between( $x, $sx1 - $CURSOR_PIXELS, $sx1 + $CURSOR_PIXELS ) ) {
+            $self->{$edge} = 'lower';
+        }
+        elsif ( _between( $x, $sx2 - $CURSOR_PIXELS, $sx2 + $CURSOR_PIXELS ) ) {
             $self->{$edge} = 'upper';
         }
     }
