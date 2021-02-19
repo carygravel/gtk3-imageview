@@ -31,6 +31,9 @@ WriteMakefile(
                 url  => 'https://github.com/carygravel/gtk3-imageview.git',
                 web  => 'https://github.com/carygravel/gtk3-imageview',
             },
+            bugtracker => {
+                web => 'https://github.com/carygravel/gtk3-imageview/issues',
+            },
         },
     },
     clean => { FILES => '$(SOURCE_TIDY)' },
