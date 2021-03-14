@@ -22,7 +22,7 @@ isa_ok(
     'get_tool() defaults to dragger'
 );
 
-my $tmp   = File::Temp->new( SUFFIX => '.jpg' );
+my $tmp   = File::Temp->new( SUFFIX => '.png' );
 my $image = Image::Magick->new();
 my $x     = $image->Read('rose:');
 $x = $image->Write( filename => $tmp );
