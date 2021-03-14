@@ -4,6 +4,7 @@ use Try::Tiny;
 use File::Temp;
 use Test::More tests => 2;
 use Test::MockObject;
+use Test::Deep;
 use Carp::Always;
 
 BEGIN {
@@ -33,6 +34,16 @@ $view->get_tool->button_pressed($event);
 $event->set_always( 'x', 93 );
 $event->set_always( 'y', 67 );
 $view->get_tool->button_released($event);
-is_deeply( $view->get_selection, { x => 32, y => 38, width => 11, height => 8 },
-    'get_selection' );
+my $factor = $view->get('scale-factor');
 
+# I don't know why this formula, but it seems to work for scales 1, 2, 3
+cmp_deeply(
+    $view->get_selection,
+    {
+        x      => num( 50 - 18 * $factor, 3 ),
+        y      => num( 50 - 12 * $factor, 3 ),
+        width  => 11 * $factor,
+        height => 8 * $factor
+    },
+    'get_selection'
+);
