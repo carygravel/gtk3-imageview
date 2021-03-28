@@ -32,25 +32,18 @@ $signal = $view->signal_connect(
     'offset-changed' => sub {
         my ( $widget, $x, $y ) = @_;
         $view->signal_handler_disconnect($signal);
-        if ( $view->get('scale-factor') > 1 ) {
-
-            # I don't know how offset is supposed to work
-            ok(1);
-            ok(1);
-        }
-        else {
+      SKIP: {
+            skip "I don't know how offset is supposed to work with HiDPI", 2
+              if $view->get('scale-factor') > 1;
             is $x, 0,  'emitted offset-changed signal x';
             is $y, 11, 'emitted offset-changed signal y';
         }
     }
 );
 $view->set_pixbuf( Gtk3::Gdk::Pixbuf->new_from_file($tmp), TRUE );
-if ( $view->get('scale-factor') > 1 ) {
-
-    # I don't know how offset is supposed to work
-    ok(1);
-}
-else {
+SKIP: {
+    skip "I don't know how offset is supposed to work with HiDPI", 1
+      if $view->get('scale-factor') > 1;
     cmp_deeply(
         $view->get_viewport,
         {
