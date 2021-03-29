@@ -455,7 +455,9 @@ sub zoom_to_box {
     my $sc_factor_h =
       min( $limit, $allocation->{height} / $box->{height} );
     $self->_set_zoom_with_center(
-        min( $sc_factor_w, $sc_factor_h ) * $additional_factor,
+        min( $sc_factor_w, $sc_factor_h ) *
+          $additional_factor *
+          $self->get('scale-factor'),
         ( $box->{x} + $box->{width} / 2 ) / $ratio,
         $box->{y} + $box->{height} / 2
     );
