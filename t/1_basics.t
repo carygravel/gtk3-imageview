@@ -70,7 +70,8 @@ is_deeply( $view->get_pixbuf_size, { width => 70, height => 46 },
 is_deeply( $view->get_allocation, { x => -1, y => -1, width => 1, height => 1 },
     'get_allocation' );
 
-is( $view->get_zoom, 0.0142857143655419, 'get_zoom()' );
+cmp_deeply( $view->get_zoom,
+    num( 0.01428 * $view->get('scale-factor'), 0.001 ), 'get_zoom()' );
 
 $signal = $view->signal_connect(
     'zoom-changed' => sub {
