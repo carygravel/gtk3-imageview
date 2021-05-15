@@ -3,7 +3,6 @@ package Gtk3::ImageView::Tool::Selector;
 use warnings;
 use strict;
 use base 'Gtk3::ImageView::Tool';
-use POSIX qw(round);
 use Glib qw(TRUE FALSE);    # To get TRUE and FALSE
 use List::Util qw(min);
 use Readonly;
@@ -121,10 +120,10 @@ sub _update_selection {
       $self->view->to_image_coords( min( $x, $x2 ), min( $y, $y2 ) );
     $self->view->set_selection(
         {
-            x      => round($x),
-            y      => round($y),
-            width  => round($w),
-            height => round($h)
+            x      => int( $x + 0.5 ),
+            y      => int( $y + 0.5 ),
+            width  => int( $w + 0.5 ),
+            height => int( $h + 0.5 )
         }
     );
     return;
