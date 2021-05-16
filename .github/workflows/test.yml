@@ -9,13 +9,17 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         # Some deps can't be installed purely from CPAN. And some other are just slow to install from there.
-      - run: sudo apt install libimage-magick-perl libgtk3-perl libglib-object-introspection-perl libtest-differences-perl libcarp-always-perl cpanminus xvfb
+      - run: sudo apt install libimage-magick-perl libgtk3-perl libglib-object-introspection-perl libtest-differences-perl libcarp-always-perl libdist-zilla-perl cpanminus xvfb
         # Install everything which is still not installed, but don't mess current directory with root-owned files
-      - run: cp -R . /tmp/copy-for-deps
+      - run: cp -R . /tmp/copy-for-dzil
+      - run: (cd /tmp/copy-for-dzil; dzil authordeps --missing | sudo cpanm --notest)
+      - run: dzil build
+      - run: ls -l
+      - run: mkdir /tmp/copy-for-deps
+      - run: cp -R Gtk3-ImageView-*/* /tmp/copy-for-deps
       - run: sudo cpanm --installdeps /tmp/copy-for-deps
-      - run: perl Makefile.PL
-      - run: xvfb-run --auto-servernum make test
-      - run: env GDK_SCALE=2 xvfb-run --auto-servernum make test
+      - run: xvfb-run --auto-servernum dzil test
+      - run: env GDK_SCALE=2 xvfb-run --auto-servernum dzil test
   lint:
     name: Lint
     runs-on: ubuntu-latest
