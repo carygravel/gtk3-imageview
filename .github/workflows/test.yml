@@ -20,6 +20,8 @@ jobs:
       - run: sudo cpanm --installdeps /tmp/copy-for-deps
       - run: xvfb-run --auto-servernum dzil test
       - run: env GDK_SCALE=2 xvfb-run --auto-servernum dzil test
+      - run: git diff
+      - run: if [[ $(git diff) != "" ]]; then exit 1; fi
   lint:
     name: Lint
     runs-on: ubuntu-latest
