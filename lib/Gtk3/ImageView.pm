@@ -198,7 +198,7 @@ sub SET_PROPERTY {
                     $invalidate = TRUE;
                 }
             }
-            when ('resolution-ratio') {
+            when ('resolution_ratio') {
                 $self->{$name} = $newval;
                 $invalidate = TRUE;
             }
