@@ -14,7 +14,6 @@ use List::Util qw(min);
 use Scalar::Util qw(blessed);
 use Carp;
 use Readonly;
-Readonly my $HALF     => 0.5;
 Readonly my $MAX_ZOOM => 100;
 
 our $VERSION = '9';

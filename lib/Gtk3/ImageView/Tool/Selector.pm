@@ -48,7 +48,7 @@ sub motion {
     return FALSE;
 }
 
-sub cursor_type_at_point {
+sub cursor_type_at_point {    ## no critic (ProhibitExcessComplexity);
     my ( $self, $x, $y ) = @_;
     if ( $self->{dragging} ) {
         return $self->{dragging};
@@ -150,21 +150,21 @@ sub _update_selection {
     }
     my $flip_we = 0;
     my $flip_ns = 0;
-    if ( $type =~ /w-resize/ ) {
-        $sel_x1  = $x;
-        $flip_we = 'e' if ( $x > $sel_x2 );
+    if ( $type =~ /w-resize/smx ) {
+        $sel_x1 = $x;
+        if ( $x > $sel_x2 ) { $flip_we = 'e' }
     }
-    if ( $type =~ /e-resize/ ) {
-        $sel_x2  = $x;
-        $flip_we = 'w' if ( $x < $sel_x1 );
+    if ( $type =~ /e-resize/smx ) {
+        $sel_x2 = $x;
+        if ( $x < $sel_x1 ) { $flip_we = 'w' }
     }
-    if ( $type =~ /n.?-resize/ ) {
-        $sel_y1  = $y;
-        $flip_ns = 's' if ( $y > $sel_y2 );
+    if ( $type =~ /n.?-resize/smx ) {
+        $sel_y1 = $y;
+        if ( $y > $sel_y2 ) { $flip_ns = 's' }
     }
-    if ( $type =~ /s.?-resize/ ) {
-        $sel_y2  = $y;
-        $flip_ns = 'n' if ( $y < $sel_y1 );
+    if ( $type =~ /s.?-resize/smx ) {
+        $sel_y2 = $y;
+        if ( $y < $sel_y1 ) { $flip_ns = 'n' }
     }
     my ( $w, $h ) = $self->view->to_image_distance( abs( $sel_x2 - $sel_x1 ),
         abs( $sel_y2 - $sel_y1 ) );
@@ -185,13 +185,14 @@ sub _update_selection {
     # a left/right cursor must stay as left/right,
     # and a top/bottom cursor must stay as top/bottom
     if ($flip_we) {
-        $type =~ s/[we]-/$flip_we-/;
+        $type =~ s/[we]-/$flip_we-/smx;
     }
     if ($flip_ns) {
-        $type =~ s/^[ns]/$flip_ns/;
+        $type =~ s/^[ns]/$flip_ns/smx;
     }
     $self->{dragging} = $type;
     $self->view->update_cursor( $x, $y );
+    return;
 }
 
 # compatibility layer
