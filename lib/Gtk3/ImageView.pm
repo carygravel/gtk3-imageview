@@ -16,7 +16,7 @@ use Carp;
 use Readonly;
 Readonly my $MAX_ZOOM => 100;
 
-our $VERSION = '9';
+our $VERSION = '11';
 
 use Glib::Object::Subclass Gtk3::DrawingArea::, signals => {
     'zoom-changed' => {
