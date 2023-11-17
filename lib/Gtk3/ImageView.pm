@@ -176,76 +176,74 @@ sub SET_PROPERTY {
     if (   ( defined $newval and defined $oldval and $newval ne $oldval )
         or ( defined $newval xor defined $oldval ) )
     {
-        given ($name) {
-            when ('pixbuf') {
+        if ($name eq 'pixbuf') {
+            $self->{$name} = $newval;
+            $invalidate = TRUE;
+        }
+        elsif ($name eq 'zoom') {
+            $self->{$name} = $newval;
+            $self->signal_emit( 'zoom-changed', $newval );
+            $invalidate = TRUE;
+        }
+        elsif ($name eq 'offset') {
+            if (   ( defined $newval xor defined $oldval )
+                or $oldval->{x} != $newval->{x}
+                or $oldval->{y} != $newval->{y} )
+            {
                 $self->{$name} = $newval;
+                $self->signal_emit( 'offset-changed', $newval->{x},
+                    $newval->{y} );
                 $invalidate = TRUE;
             }
-            when ('zoom') {
+        }
+        elsif ($name eq 'resolution_ratio') {
+            $self->{$name} = $newval;
+            $invalidate = TRUE;
+        }
+        elsif ($name eq 'interpolation') {
+            $self->{$name} = $newval;
+            $invalidate = TRUE;
+        }
+        elsif ($name eq 'selection') {
+            if ( _selections_nequal( $oldval, $newval ) ) {
+                $self->{$name}           = $newval;
+                $self->{selection_float} = $newval;
+                $invalidate              = TRUE;
+                $self->signal_emit( 'selection-changed', $newval );
+            }
+        }
+        elsif ($name eq 'selection_float') {
+            if ( _selections_nequal( $oldval, $newval ) ) {
                 $self->{$name} = $newval;
-                $self->signal_emit( 'zoom-changed', $newval );
-                $invalidate = TRUE;
-            }
-            when ('offset') {
-                if (   ( defined $newval xor defined $oldval )
-                    or $oldval->{x} != $newval->{x}
-                    or $oldval->{y} != $newval->{y} )
-                {
-                    $self->{$name} = $newval;
-                    $self->signal_emit( 'offset-changed', $newval->{x},
-                        $newval->{y} );
-                    $invalidate = TRUE;
-                }
-            }
-            when ('resolution_ratio') {
-                $self->{$name} = $newval;
-                $invalidate = TRUE;
-            }
-            when ('interpolation') {
-                $self->{$name} = $newval;
-                $invalidate = TRUE;
-            }
-            when ('selection') {
-                if ( _selections_nequal( $oldval, $newval ) ) {
-                    $self->{$name}           = $newval;
-                    $self->{selection_float} = $newval;
-                    $invalidate              = TRUE;
-                    $self->signal_emit( 'selection-changed', $newval );
-                }
-            }
-            when ('selection_float') {
-                if ( _selections_nequal( $oldval, $newval ) ) {
-                    $self->{$name} = $newval;
-                    my $x1 = int( $newval->{x} + 0.5 );
-                    my $y1 = int( $newval->{y} + 0.5 );
-                    my $x2 = int( $newval->{x} + $newval->{width} + 0.5 );
-                    my $y2 = int( $newval->{y} + $newval->{height} + 0.5 );
-                    $self->{selection} = {
-                        x      => $x1,
-                        y      => $y1,
-                        width  => $x2 - $x1,
-                        height => $y2 - $y1,
-                    };
+                my $x1 = int( $newval->{x} + 0.5 );
+                my $y1 = int( $newval->{y} + 0.5 );
+                my $x2 = int( $newval->{x} + $newval->{width} + 0.5 );
+                my $y2 = int( $newval->{y} + $newval->{height} + 0.5 );
+                $self->{selection} = {
+                    x      => $x1,
+                    y      => $y1,
+                    width  => $x2 - $x1,
+                    height => $y2 - $y1,
+                };
 
 # Even for the float selection, w/h should be int; otherwise dragging the selection looks funny
-                    $self->{$name}->{width}  = $x2 - $x1;
-                    $self->{$name}->{height} = $y2 - $y1;
-                    $invalidate              = TRUE;
-                    $self->signal_emit( 'selection-changed', $newval );
-                }
+                $self->{$name}->{width}  = $x2 - $x1;
+                $self->{$name}->{height} = $y2 - $y1;
+                $invalidate              = TRUE;
+                $self->signal_emit( 'selection-changed', $newval );
             }
-            when ('tool') {
-                $self->{$name} = $newval;
-                if ( defined $self->get_selection ) {
-                    $invalidate = TRUE;
-                }
-                $self->signal_emit( 'tool-changed', $newval );
+        }
+        elsif ($name eq 'tool') {
+            $self->{$name} = $newval;
+            if ( defined $self->get_selection ) {
+                $invalidate = TRUE;
             }
-            default {
-                $self->{$name} = $newval;
+            $self->signal_emit( 'tool-changed', $newval );
+        }
+        else {
+            $self->{$name} = $newval;
 
-                #                $self->SUPER::SET_PROPERTY( $pspec, $newval );
-            }
+            #                $self->SUPER::SET_PROPERTY( $pspec, $newval );
         }
         if ($invalidate) {
             $self->queue_draw();
@@ -612,16 +610,14 @@ sub set_tool {
     if ( not( blessed $tool and $tool->isa('Gtk3::ImageView::Tool') ) ) {
 
         # TODO remove this fallback, only accept Tool directly
-        given ($tool) {
-            when ('dragger') {
-                $tool = Gtk3::ImageView::Tool::Dragger->new($self);
-            }
-            when ('selector') {
-                $tool = Gtk3::ImageView::Tool::Selector->new($self);
-            }
-            default {
-                croak 'invalid set_tool call';
-            }
+        if ($tool eq 'dragger') {
+            $tool = Gtk3::ImageView::Tool::Dragger->new($self);
+        }
+        elsif ($tool eq 'selector') {
+            $tool = Gtk3::ImageView::Tool::Selector->new($self);
+        }
+        else {
+            croak 'invalid set_tool call';
         }
     }
     $self->set( 'tool', $tool );
