@@ -1,4 +1,6 @@
 {{$NEXT}}
+  - Replaced deprecated given/when with if/elsif/else
+  - Fixed Dist::Zilla config, hopefully
 
 10        2021-10-03 11:33:07 IST
   - Switched to Dist::Zilla
