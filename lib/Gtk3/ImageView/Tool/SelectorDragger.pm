@@ -5,7 +5,7 @@ use strict;
 use base 'Gtk3::ImageView::Tool';
 use Glib qw(TRUE FALSE);    # To get TRUE and FALSE
 
-our $VERSION = '12';
+our $VERSION = '13';
 
 sub new {
     my $class = shift;

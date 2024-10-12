@@ -9,7 +9,7 @@ use Readonly;
 Readonly my $RIGHT_BUTTON => 3;
 Readonly my $EDGE_WIDTH   => 5;
 
-our $VERSION = '12';
+our $VERSION = '13';
 
 sub button_pressed {
     my ( $self, $event ) = @_;
