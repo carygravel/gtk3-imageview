@@ -1,5 +1,6 @@
 {{$NEXT}}
   - Removed perl feature switch, for compatibility with newer perl
+  - Made linter on CI happy
 
 11        2024-10-01 17:08:47 IST
   - Replaced deprecated given/when with if/elsif/else
