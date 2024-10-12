@@ -4,7 +4,7 @@ Gtk3 imager viewer widget modelled after the GtkImageView C widget by Björn
 Lindqvist <bjourne@gmail.com>
 
 To discuss Gtk3::ImageView or gtk3-perl, ask questions and flame/praise the
-authors, join [mailing list](gtk-perl-list@gnome.org at lists.gnome.org).
+authors, join [mailing list](mailto:gtk-perl-list@gnome.org) at lists.gnome.org.
 
 ## INSTALLATION
 
