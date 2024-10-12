@@ -2,12 +2,13 @@ name: Test
 on:
   - push
   - pull_request
+permissions: {}
 jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         # Some deps can't be installed purely from CPAN. And some other are just slow to install from there.
       - run: sudo apt install libimage-magick-perl libgtk3-perl libglib-object-introspection-perl libtest-differences-perl libcarp-always-perl libdist-zilla-perl cpanminus xvfb
         # Install everything which is still not installed, but don't mess current directory with root-owned files
