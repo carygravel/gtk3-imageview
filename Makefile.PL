@@ -43,7 +43,6 @@ my %WriteMakefileArgs = (
     "Test::Deep" => 0,
     "Test::MockObject" => 0,
     "Test::More" => 0,
-    "Test::Perl::Critic" => 0,
     "Try::Tiny" => 0
   },
   "VERSION" => 12,
@@ -70,7 +69,6 @@ my %FallbackPrereqs = (
   "Test::Deep" => 0,
   "Test::MockObject" => 0,
   "Test::More" => 0,
-  "Test::Perl::Critic" => 0,
   "Try::Tiny" => 0,
   "base" => 0,
   "if" => 0,
