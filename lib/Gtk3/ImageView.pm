@@ -3,7 +3,6 @@ package Gtk3::ImageView;
 use warnings;
 use strict;
 no if $] >= 5.018, warnings => 'experimental::smartmatch';
-use feature 'switch';
 use Cairo;
 use Glib qw(TRUE FALSE);    # To get TRUE and FALSE
 use Gtk3;
